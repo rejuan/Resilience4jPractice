@@ -1,7 +1,10 @@
 package com.shortandprecise.resilience4jpractice.config;
 
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -11,7 +14,8 @@ import java.time.Duration;
 @Component
 public class ApplicationStartUp implements ApplicationRunner {
 
-	CircuitBreakerRegistry circuitBreakerRegistry;
+	public static final Logger LOGGER = LoggerFactory.getLogger(ApplicationStartUp.class);
+	private CircuitBreakerRegistry circuitBreakerRegistry;
 
 	public ApplicationStartUp(CircuitBreakerRegistry circuitBreakerRegistry) {
 		this.circuitBreakerRegistry = circuitBreakerRegistry;
@@ -33,6 +37,8 @@ public class ApplicationStartUp implements ApplicationRunner {
 				.recordException(throwable -> true)
 				.build();
 
-		circuitBreakerRegistry.circuitBreaker("webclient", circuitBreakerConfig);
+		CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker("webclient", circuitBreakerConfig);
+		circuitBreaker.getEventPublisher().onStateTransition(event ->
+				LOGGER.info(event.getStateTransition().toString()));
 	}
 }

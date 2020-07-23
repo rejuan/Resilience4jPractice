@@ -30,7 +30,6 @@ public class WebClientService {
 	}
 
 	public Mono<String> getResponse() {
-
 		CircuitBreaker circuitBreaker = circuitBreakerRegistry.find("webclient").get();
 
 		return webClient.get()
